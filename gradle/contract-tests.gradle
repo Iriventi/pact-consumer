@@ -1,0 +1,45 @@
+sourceSets {
+	consumerContractTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/consumerContractTest/java')
+		}
+		resources.srcDir file('src/consumerContractTest/resources')
+	}
+}
+
+
+
+configurations {
+
+	consumerContractTestCompile.extendsFrom testCompile
+	consumerContractTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+	testCompile("au.com.dius:pact-jvm-consumer-junit_2.11:3.5.24")
+	testRuntime("au.com.dius:pact-jvm-consumer-junit_2.11:3.5.24")
+
+	testCompile('au.com.dius:pact-jvm-provider-junit_2.11:3.5.24')
+	testCompile("au.com.dius:pact-jvm-provider-spring_2.11:3.5.24")
+
+}
+
+task consumerContractTest(type: Test) {
+	testClassesDirs = sourceSets.consumerContractTest.output.classesDirs
+	classpath = sourceSets.consumerContractTest.runtimeClasspath
+	testLogging {
+		events 'passed', 'skipped', 'failed'
+	}
+	systemProperty 'pact.rootDir', "$buildDir/pacts"
+//  if you need to exclude providers classes
+//	exclude '**/provider/*'
+}
+
+pact {
+	publish{
+		pactDirectory = "$buildDir/pacts"
+		pactBrokerUrl = 'your pact broker URL'
+	}
+}
